@@ -10,7 +10,7 @@ class UserAuthentication(authentication.BaseAuthentication):
         print(token)
         print(headers)
         if not token:
-            return None
+            raise exceptions.AuthenticationFailed('token tidak ditemukan')
 
         try:
             r = requests.get(url,headers=headers)
@@ -26,7 +26,7 @@ class UserAuthentication(authentication.BaseAuthentication):
             print(username)
             print(user)
         except Exception:
-            print("disini")
-            return None
+            raise exceptions.AuthenticationFailed('token tidak valid')
+            
 
         return (user, None)

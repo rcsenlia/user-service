@@ -6,10 +6,10 @@ from django.db.models.signals import post_save
 
 # Create your models here.
 class Hobi(models.Model):
-    hobi = models.CharField(max_length=50)
+    hobi = models.CharField(max_length=50,unique=True)
 
 class Genre(models.Model):
-    genre = models.CharField(max_length=50)
+    genre = models.CharField(max_length=50,unique=True)
 
 
 class Profile(models.Model):
@@ -17,7 +17,7 @@ class Profile(models.Model):
     gender = models.CharField(max_length=1,blank=True,null=True,choices=(('P','P'),('L','L')))
     deskripsi =  models.CharField(max_length=150,blank=True,null=True)
     domisili = models.CharField(max_length=150,blank=True,null=True)
-    umur = models.CharField(max_length=20,blank=True,null=True)
+    umur = models.IntegerField(blank=True,null=True)
     teman = models.ManyToManyField(User,through="Relationship",symmetrical=False,related_name="teman")
     hobi = models.ManyToManyField(Hobi)
     genre = models.ManyToManyField(Genre)

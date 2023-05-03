@@ -8,6 +8,11 @@ class HobiSerializer(serializers.ModelSerializer):
         model = Hobi
         fields = "__all__"
 
+class HobiIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hobi
+        fields = ['id']
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
@@ -30,3 +35,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
+
+class ProfileOnlySerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Profile
+        fields = ['gender','deskripsi','domisili','umur']

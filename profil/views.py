@@ -9,9 +9,10 @@ from rest_framework.permissions import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
-from .serializers import ProfileSerializer,HobiSerializer,GenreSerializer,RelationshipSerializer,UserSerializer
+from .serializers import ProfileSerializer,HobiSerializer,GenreSerializer,RelationshipSerializer,UserSerializer,HobiIdSerializer,ProfileOnlySerializer
 from .models import Profile,Hobi,Genre,Relationship
 from userauth.auth import UserAuthentication
+from django.core.exceptions import ObjectDoesNotExist
 # Create your views here.
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
@@ -27,7 +28,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail = False,methods=['post'],serializer_class=UserSerializer)
     def post_profile_username(self, request):
-        username = request.data['username']
+        username = request.data.get('username',None)
+        if(username == None):
+            return Response({"username":"This field is required"},status=400)
         profile = Profile.objects.filter(user__username=username)
         serializer = ProfileSerializer(profile, many=True)
         return Response(serializer.data)
@@ -40,7 +43,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
         deskripsi =  data.get('deskripsi',None)
         domisili = data.get('domisili',None)
         umur = data.get('umur',None)
-        
+        cek = ProfileOnlySerializer(data=data)
+        cek.is_valid(raise_exception=True)
         if(gender):
             user.profile.gender = gender
         if(deskripsi):
@@ -54,21 +58,32 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     @action(detail=False,methods=['post'])
     def add_hobi(self,request):
-        hobi_id = request.data['hobi']
-        user = request.user
-        for id in hobi_id :
-            hobi = Hobi.objects.get(id=id)
-            user.profile.hobi.add(hobi)
+        
+        hobi_id = request.data.get('hobi',None)
+        if(hobi_id == None):
+            return Response({"hobi":"this field is required"},status=400)
+        try :
+            user = request.user
+            for id in hobi_id :
+                hobi = Hobi.objects.get(id=id)
+                user.profile.hobi.add(hobi)
+        except TypeError:
+            return Response({"hobi":"hobi is type list of int (the id of hobi)"},status=401)
         user.profile.save()
         serializer = ProfileSerializer(user.profile)
         return Response(serializer.data)
     @action(detail=False,methods=['post'])
     def add_genre(self,request):
         genre_id = request.data['genre']
-        user = request.user
-        for id in genre_id:
-            genre = Genre.objects.get(id=id)
-            user.profile.genre.add(genre)
+        if(genre_id == None):
+            return Response({"genre":"this field is required"},status=400)
+        try :
+            user = request.user
+            for id in genre_id:
+                genre = Genre.objects.get(id=id)
+                user.profile.genre.add(genre)
+        except TypeError:
+            return Response({"hobi":"hobi is type list of int (the id of hobi)"},status=401)
         user.profile.save()
         serializer = ProfileSerializer(user.profile)
         return Response(serializer.data)
@@ -76,8 +91,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def add_teman(self,request):
         user = request.user
-        username = request.data['username']
-        teman = User.objects.get(username=username)
+        username = request.data.get('username',None)
+        if(username == None):
+            return Response({"username":"This field is required"},status=400)
+        
+        try :
+            teman = User.objects.get(username=username)
+        except ObjectDoesNotExist:
+            return Response({"error":"user not found"},status=401)
         user.profile.teman.add(teman)
         user.profile.save()
         serializer = ProfileSerializer(user.profile)
@@ -90,8 +111,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'])
     def get_friend_username(self,request):
-        username = request.data['username']
-        user = User.objects.get(username=username)
+        username = request.data.get('username',None)
+        if(username == None):
+            return Response({"username":"This field is required"},status=400)
+        try :
+            user = User.objects.get(username=username)
+        except ObjectDoesNotExist:
+            return Response({"error":"user not found"},status=401)
         serializer = UserSerializer(user.profile.teman,many=True)
         return Response(serializer.data)
     

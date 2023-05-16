@@ -92,6 +92,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
     def add_teman(self,request):
         user = request.user
         username = request.data.get('username',None)
+        if(username == user.username):
+            return Response({"Cannot add self to friend list"},status=400)
         if(username == None):
             return Response({"username":"This field is required"},status=400)
         

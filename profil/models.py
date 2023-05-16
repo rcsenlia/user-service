@@ -18,7 +18,7 @@ class Profile(models.Model):
     deskripsi =  models.CharField(max_length=150,blank=True,null=True)
     domisili = models.CharField(max_length=150,blank=True,null=True)
     umur = models.IntegerField(blank=True,null=True)
-    teman = models.ManyToManyField(User,through="Relationship",symmetrical=False,related_name="teman")
+    teman = models.ManyToManyField(User,through="Relationship",symmetrical=True,related_name="teman")
     hobi = models.ManyToManyField(Hobi)
     genre = models.ManyToManyField(Genre)
 

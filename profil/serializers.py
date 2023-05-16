@@ -32,6 +32,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     hobi = HobiSerializer(many=True)
     genre = GenreSerializer(many=True)
     teman = UserSerializer(many=True)
+    user = UserSerializer()
     class Meta:
         model = Profile
         fields = "__all__"
